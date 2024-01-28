@@ -91,21 +91,17 @@ class Table():
     
     def assign_seat(self, name):
         """
-        Assigns randomly a seat to a person if a free spot is available. 
+        Assigns a seat to a person if a free spot is available. 
         If there are no free spots, it prints a message indicating that there are 
         no free seats available.
         """
-
-        import random
-
-        free_seats = [seat_number for seat_number, seat in self.seats.items() if seat.free]
-        if not free_seats:
-            print("No free seats available.")
-            return
-        chosen_seat = random.choice(free_seats)
-        seat_to_assign = self.seats[chosen_seat]
-        seat_to_assign.set_occupant(name)
-
+        sorted_seats = sorted(self.seats.keys())
+        for seat_number in sorted_seats:
+            if self.seats[seat_number].free:
+                seat_to_assign = self.seats[seat_number]
+                seat_to_assign.set_occupant(name)
+                break
+            
     def capacity_left(self):
         """
         Calculates the number of free spots left at the table. Returns an integer.

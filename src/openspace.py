@@ -1,5 +1,6 @@
 from src.table import Table
 import pandas as pd 
+from random import shuffle 
 
 class OpenSpace():
     """
@@ -23,6 +24,8 @@ class OpenSpace():
     * display()
 
     * store()
+
+    * add_new_person()
     ______
      """
     def __init__(self, number_of_tables:int=6):
@@ -30,42 +33,69 @@ class OpenSpace():
 
     def organize(self, file):
         """
-        Assigns each name in the provided excel file to a free chair in the open space.
-        The assignment stops once all names have been assigned or there are no more free spots.
-        ///Be cautious since the parameters inside variable 'df' and 'names' are case sensitive, 
-        be sure to write the corresponding sheet and column name to your excel file!///
+       This method shuffles the names and selects one randomly.
+       Each name from the provided Excel file is then assigned to an available seat in the open space. 
+       The assignment process continues until all names have been assigned or there are no more available seats.
+       
+       ///Please note that the parameters within the 'df' and 'names' variables are case sensitive.
+       Ensure to match the sheet and column names exactly with those in your Excel file.///
         """
         
         excel_file = pd.ExcelFile(file)
 
         df = excel_file.parse('Sheet_names')
         names = df['Names'].tolist()
-        number_people  = len(names)
+        shuffle(names)
+        number_of_people = 0
 
         for name in names:
-            for table_number, table in self.opspaces.items():
+            for table in self.opspaces.values():
                 if table.has_free_spot():
                     table.assign_seat(name)
                     break
         counter = 0
-        for table_number, table in self.opspaces.items():
+        total_seats = 0
+        for table in self.opspaces.values():
             for seat in table.seats.values():
+                total_seats += 1
+                if not seat.free:
+                    number_of_people += 1
                 if seat.free:
                     counter += 1 
-                
-        max_seats = 24
+
         last = []
-        if number_people > max_seats:
-            result = names[max_seats:]
+        print(f"\nThe room capacity is {total_seats}.")
+        # Fix the list output. You want it to output names, but not in list format
+        if number_of_people > total_seats:
+            result = names[total_seats:]
             last = [name for name in result]
-            
+            print(f"\nThere are {number_of_people} persons in the room, "
+                  f"{counter} seats are unoccupied.\n")
+            print(f"{last} hasn't been asigned a chair\n")
+        elif number_of_people == total_seats - 1:
+            print(f"\nThere are {number_of_people} persons in the room, "
+                  f"{counter} seat remains free.\n")
+        else:
+            print(f"\nThere are {number_of_people} persons in the room, "
+                  f"{counter} seats are unoccupied.\n")      
 
-        print(f"\nThe room capacity is {max_seats}.")
-        print(f"\nThere are {number_people} persons in the room and {counter} free seats left.\n")
-        print(f"{last} hasn't been asigned a chair\n")
+    def add_new_person(self, name:str):
+        seat_assigned = False
+        for table in self.opspaces.values():
+            if seat_assigned == False:
+                for seat in table.seats.values():
+                    if seat.free:
+                        seat.set_occupant(name)
+                        seat_assigned = True
+                        print(f"{name} has been assigned a chair. ")
+                        break
+        counter = 0
+        for table in self.opspaces.values():
+            for seat in table.seats.values():
+                if not seat.free:
+                    counter += 1 
+        print(f"There are now {counter} persons in the room.\n") 
         
-        
-
     def display(self):
         """
         Prints the current state of the open space, 
