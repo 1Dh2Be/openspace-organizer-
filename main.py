@@ -18,4 +18,4 @@ if __name__ == "__main__":
     room.display()
 
     # Stores the displayed seating arrangement in an excel file. 
-    #room.store("sorted_places.xlsx") 
+    room.store("sorted_places.xlsx") 
